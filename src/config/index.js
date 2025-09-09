@@ -3,7 +3,7 @@ const env = process.env.NODE_ENV || 'local'
 const config = {
   test: {
     port: 8383,
-    db: 'mongodb://localhost/blogs-db1'
+    db: 'mongodb://localhost/blogs-db'
   },
   local: {
     port: 8383,
