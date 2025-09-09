@@ -7,7 +7,7 @@ const config = {
   },
   local: {
     port: 8383,
-    db: 'mongodb://localhost/blogs-db'
+    db: 'mongodb+srv://u6511106_db_user:199406jb@cluster0.coa8zpe.mongodb.net/au_connect?retryWrites=true&w=majority&appName=Cluster0'
   },
   dev: {
     port: 8383,
