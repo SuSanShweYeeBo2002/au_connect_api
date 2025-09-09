@@ -53,7 +53,7 @@ function setupExpress () {
     })
   })
 
-  app.use('/api' + '/*', checkAuth)
+  // app.use('/api' + '/*', checkAuth)
 
   const dir = path.join(__dirname, '../routes/*.js')
   const routes = glob.sync(dir.replace(/\\/g, '/'))
