@@ -26,5 +26,8 @@
     "mongoose": "^6.12.0",
     "morgan": "^1.10.0",
     "redoc-express": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20.18.0"
   }
 }
