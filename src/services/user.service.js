@@ -50,9 +50,16 @@ async function signinService ({ email, password }) {
       throw err
     }
 
-    const token = await jwt.sign({ email, password }, 'secret', {
-      expiresIn: '24h'
-    })
+    const token = await jwt.sign(
+      { 
+        id: user._id,
+        email: user.email
+      }, 
+      'secret', 
+      {
+        expiresIn: '24h'
+      }
+    )
 
     return { token }
   } catch (error) {
