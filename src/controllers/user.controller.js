@@ -1,7 +1,8 @@
 import {
   signupService,
-  signinService
-} from '../services/user.service'
+  signinService,
+  getUserListService
+} from '../services/user.service.js'
 
 async function signup (req, res, next) {
   try {
@@ -31,4 +32,19 @@ async function signin (req, res, next) {
   }
 }
 
-export { signup, signin }
+async function getUserList(req, res, next) {
+  try {
+    const currentUserId = req.userData.id
+    const users = await getUserListService(currentUserId)
+    
+    res.status(200).send({
+      status: 'success',
+      message: 'Users retrieved successfully',
+      data: users
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export { signup, signin, getUserList }

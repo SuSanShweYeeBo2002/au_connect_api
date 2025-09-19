@@ -70,7 +70,25 @@ async function signinService ({ email, password }) {
   }
 }
 
+async function getUserListService(currentUserId) {
+  try {
+    // Get all users except the current user
+    const users = await User.find(
+      { _id: { $ne: currentUserId } },
+      { email: 1 } // Only return _id and email fields
+    ).sort({ email: 1 })
+
+    return users
+  } catch (error) {
+    const err = new Error()
+    err.message = error.message
+    err.status = error.status
+    throw err
+  }
+}
+
 export {
   signupService,
-  signinService
+  signinService,
+  getUserListService
 }
