@@ -61,7 +61,11 @@ async function signinService ({ email, password }) {
       }
     )
 
-    return { token }
+    return { 
+      token,
+      userId: user._id,
+      email: user.email
+    }
   } catch (error) {
     const err = new Error()
     err.message = error.message
