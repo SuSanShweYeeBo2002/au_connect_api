@@ -16,10 +16,10 @@ const postSchema = new Schema(
     image: {
       type: String // URL to uploaded image
     },
-    likes: [{
-      type: Schema.Types.ObjectId,
-      ref: 'User'
-    }],
+    likeCount: {
+      type: Number,
+      default: 0
+    },
     commentCount: {
       type: Number,
       default: 0
@@ -35,6 +35,13 @@ const postSchema = new Schema(
 // Virtual to populate comments if needed
 postSchema.virtual('comments', {
   ref: 'Comment',
+  localField: '_id',
+  foreignField: 'postId'
+})
+
+// Virtual to populate likes if needed
+postSchema.virtual('likes', {
+  ref: 'Like',
   localField: '_id',
   foreignField: 'postId'
 })

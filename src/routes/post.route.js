@@ -5,8 +5,7 @@ import {
   getAllPosts,
   getPostById,
   updatePost,
-  deletePost,
-  likePost
+  deletePost
 } from '../controllers/post.controller.js'
 import {
   createPostValidation,
@@ -23,9 +22,6 @@ router.get('/', paginationValidation, getAllPosts) // Public route to view all p
 router.get('/:postId', postIdValidation, getPostById)
 router.put('/:postId', checkAuth, postIdValidation, updatePostValidation, updatePost)
 router.delete('/:postId', checkAuth, postIdValidation, deletePost)
-
-// Like/Unlike post
-router.post('/:postId/like', checkAuth, postIdValidation, likePost)
 
 export default app => {
   app.use('/posts', router)

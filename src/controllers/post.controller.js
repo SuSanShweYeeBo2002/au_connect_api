@@ -3,8 +3,7 @@ import {
   getAllPosts as getAllPostsService,
   getPostById as getPostByIdService,
   updatePost as updatePostService,
-  deletePost as deletePostService,
-  likePost as likePostService
+  deletePost as deletePostService
 } from '../services/post.service.js'
 
 async function createPost(req, res, next) {
@@ -87,27 +86,10 @@ async function deletePost(req, res, next) {
   }
 }
 
-async function likePost(req, res, next) {
-  try {
-    const { postId } = req.params
-    const userId = req.userData.id
-
-    const post = await likePostService(postId, userId)
-    res.status(200).send({
-      status: 'success',
-      message: 'Post like status updated',
-      data: post
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
 export {
   createPost,
   getAllPosts,
   getPostById,
   updatePost,
-  deletePost,
-  likePost
+  deletePost
 }

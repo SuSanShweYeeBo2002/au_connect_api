@@ -113,42 +113,10 @@ async function deletePost(postId, authorId) {
   }
 }
 
-async function likePost(postId, userId) {
-  try {
-    const post = await Post.findById(postId)
-    
-    if (!post) {
-      const err = new Error()
-      err.message = 'Post not found'
-      err.status = 404
-      throw err
-    }
-    
-    const isLiked = post.likes.includes(userId)
-    
-    if (isLiked) {
-      // Unlike the post
-      post.likes = post.likes.filter(id => id.toString() !== userId.toString())
-    } else {
-      // Like the post
-      post.likes.push(userId)
-    }
-    
-    await post.save()
-    return post.populate('author', 'email')
-  } catch (error) {
-    const err = new Error()
-    err.message = error.message
-    err.status = error.status || 500
-    throw err
-  }
-}
-
 export {
   createPost,
   getAllPosts,
   getPostById,
   updatePost,
-  deletePost,
-  likePost
+  deletePost
 }
