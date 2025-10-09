@@ -2,7 +2,8 @@ import {
   sendMessage as sendMessageService,
   getConversation as getConversationService,
   getUserConversations as getUserConversationsService,
-  markConversationAsRead
+  markConversationAsRead,
+  deleteMessage as deleteMessageService
 } from '../services/message.service.js'
 
 async function sendMessage(req, res, next) {
@@ -67,9 +68,25 @@ async function markAsRead(req, res, next) {
   }
 }
 
+async function deleteMessage(req, res, next) {
+  try {
+    const { messageId } = req.params
+    const userId = req.userData.id
+
+    const result = await deleteMessageService(messageId, userId)
+    res.status(200).send({
+      status: 'success',
+      message: result.message
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export {
   sendMessage,
   getConversation,
   getUserConversations,
-  markAsRead
+  markAsRead,
+  deleteMessage
 }

@@ -89,9 +89,37 @@ async function markConversationAsRead(conversationId, userId) {
   }
 }
 
+async function deleteMessage(messageId, userId) {
+  try {
+    const message = await Message.findById(messageId)
+    
+    if (!message) {
+      const err = new Error('Message not found')
+      err.status = 404
+      throw err
+    }
+
+    // Check if the user is authorized to delete the message (only sender can delete)
+    if (message.sender.toString() !== userId.toString()) {
+      const err = new Error('Unauthorized to delete this message')
+      err.status = 403
+      throw err
+    }
+
+    await Message.findByIdAndDelete(messageId)
+    return { message: 'Message deleted successfully' }
+  } catch (error) {
+    const err = new Error()
+    err.message = error.message
+    err.status = error.status || 500
+    throw err
+  }
+}
+
 export {
   sendMessage,
   getConversation,
   getUserConversations,
-  markConversationAsRead
+  markConversationAsRead,
+  deleteMessage
 }
