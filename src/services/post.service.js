@@ -1,4 +1,5 @@
 import Post from '../models/post.js'
+import Like from '../models/like.js'
 
 async function createPost(authorId, content, image = null) {
   try {
@@ -17,7 +18,7 @@ async function createPost(authorId, content, image = null) {
   }
 }
 
-async function getAllPosts(page = 1, limit = 10) {
+async function getAllPosts(page = 1, limit = 10, userId = null) {
   try {
     const skip = (page - 1) * limit
     const posts = await Post.find()
@@ -28,8 +29,31 @@ async function getAllPosts(page = 1, limit = 10) {
     
     const totalPosts = await Post.countDocuments()
     
+    // If userId is provided, check which posts are liked by the user
+    let postsWithLikeStatus = posts
+    if (userId) {
+      // Get all post IDs
+      const postIds = posts.map(post => post._id)
+      
+      // Find likes by this user for these posts
+      const userLikes = await Like.find({
+        postId: { $in: postIds },
+        userId: userId
+      }).select('postId')
+      
+      // Create a Set of liked post IDs for quick lookup
+      const likedPostIds = new Set(userLikes.map(like => like.postId.toString()))
+      
+      // Add isLikedByUser field to each post
+      postsWithLikeStatus = posts.map(post => {
+        const postObj = post.toObject()
+        postObj.isLikedByUser = likedPostIds.has(post._id.toString())
+        return postObj
+      })
+    }
+    
     return {
-      posts,
+      posts: postsWithLikeStatus,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalPosts / limit),
@@ -46,7 +70,7 @@ async function getAllPosts(page = 1, limit = 10) {
   }
 }
 
-async function getPostById(postId) {
+async function getPostById(postId, userId = null) {
   try {
     const post = await Post.findById(postId)
       .populate('author', 'email')
@@ -58,7 +82,16 @@ async function getPostById(postId) {
       throw err
     }
     
-    return post
+    // If userId is provided, check if user has liked this post
+    let postWithLikeStatus = post
+    if (userId) {
+      const userLike = await Like.findOne({ postId, userId })
+      const postObj = post.toObject()
+      postObj.isLikedByUser = !!userLike
+      postWithLikeStatus = postObj
+    }
+    
+    return postWithLikeStatus
   } catch (error) {
     const err = new Error()
     err.message = error.message

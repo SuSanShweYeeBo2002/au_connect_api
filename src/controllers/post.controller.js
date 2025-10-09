@@ -26,8 +26,9 @@ async function getAllPosts(req, res, next) {
   try {
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
+    const userId = req.userData.id // Always available due to checkAuth middleware
 
-    const result = await getAllPostsService(page, limit)
+    const result = await getAllPostsService(page, limit, userId)
     res.status(200).send({
       status: 'success',
       message: 'Posts retrieved successfully',
@@ -42,8 +43,9 @@ async function getAllPosts(req, res, next) {
 async function getPostById(req, res, next) {
   try {
     const { postId } = req.params
+    const userId = req.userData.id // Always available due to checkAuth middleware
 
-    const post = await getPostByIdService(postId)
+    const post = await getPostByIdService(postId, userId)
     res.status(200).send({
       status: 'success',
       message: 'Post retrieved successfully',

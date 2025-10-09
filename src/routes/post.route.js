@@ -18,8 +18,8 @@ const router = express.Router()
 
 // Post CRUD routes
 router.post('/', checkAuth, createPostValidation, createPost)
-router.get('/', paginationValidation, getAllPosts) // Public route to view all posts
-router.get('/:postId', postIdValidation, getPostById)
+router.get('/', checkAuth, paginationValidation, getAllPosts) // Protected route with like status
+router.get('/:postId', checkAuth, postIdValidation, getPostById) // Protected route with like status
 router.put('/:postId', checkAuth, postIdValidation, updatePostValidation, updatePost)
 router.delete('/:postId', checkAuth, postIdValidation, deletePost)
 
