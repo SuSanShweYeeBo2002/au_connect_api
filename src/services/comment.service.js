@@ -1,7 +1,7 @@
 import Comment from '../models/comment.js'
 import Post from '../models/post.js'
 
-async function addComment(postId, authorId, content) {
+async function addComment(postId, authorId, content, image = null) {
   try {
     // Check if post exists
     const post = await Post.findById(postId)
@@ -16,7 +16,8 @@ async function addComment(postId, authorId, content) {
     const comment = await new Comment({
       postId,
       author: authorId,
-      content
+      content,
+      image
     }).save()
 
     // Increment comment count on post
@@ -60,7 +61,7 @@ async function getCommentsByPost(postId, page = 1, limit = 10) {
   }
 }
 
-async function updateComment(commentId, authorId, content) {
+async function updateComment(commentId, authorId, content, image = null) {
   try {
     const comment = await Comment.findOne({ _id: commentId, author: authorId })
     
@@ -72,6 +73,9 @@ async function updateComment(commentId, authorId, content) {
     }
 
     comment.content = content
+    if (image !== null) {
+      comment.image = image
+    }
     await comment.save()
 
     return comment.populate('author', 'email')

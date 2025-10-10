@@ -17,6 +17,9 @@ const commentSchema = new Schema(
       type: String,
       required: true,
       maxlength: 500
+    },
+    image: {
+      type: String // URL to uploaded image
     }
   },
   {

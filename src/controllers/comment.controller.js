@@ -8,10 +8,10 @@ import {
 async function addComment(req, res, next) {
   try {
     const { postId } = req.params
-    const { content } = req.body
+    const { content, image } = req.body
     const authorId = req.userData.id
 
-    const comment = await addCommentService(postId, authorId, content)
+    const comment = await addCommentService(postId, authorId, content, image)
     res.status(201).send({
       status: 'success',
       message: 'Comment added successfully',
@@ -43,10 +43,10 @@ async function getCommentsByPost(req, res, next) {
 async function updateComment(req, res, next) {
   try {
     const { commentId } = req.params
-    const { content } = req.body
+    const { content, image } = req.body
     const authorId = req.userData.id
 
-    const comment = await updateCommentService(commentId, authorId, content)
+    const comment = await updateCommentService(commentId, authorId, content, image)
     res.status(200).send({
       status: 'success',
       message: 'Comment updated successfully',
