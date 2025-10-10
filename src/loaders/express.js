@@ -47,9 +47,35 @@ function setupExpress () {
     })
   )
 
+  // Health check and deployment test route
   app.use('/server-status', (req, res) => {
     res.status(200).json({
-      message: 'Server is up and running!'
+      status: 'success',
+      message: 'Server is up and running!',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      version: '1.0.0',
+      uptime: process.uptime(),
+      endpoints: {
+        health: '/server-status',
+        docs: '/docs',
+        api: {
+          users: '/users',
+          posts: '/posts',
+          comments: '/comments',
+          likes: '/likes',
+          messages: '/messages',
+          blogs: '/blogs'
+        }
+      }
+    })
+  })
+
+  // Simple health check endpoint
+  app.use('/health', (req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString()
     })
   })
 
