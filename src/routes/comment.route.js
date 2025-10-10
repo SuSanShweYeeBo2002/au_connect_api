@@ -18,7 +18,7 @@ const router = express.Router()
 
 // Comment routes
 router.post('/post/:postId', checkAuth, postIdValidation, addCommentValidation, addComment)
-router.get('/post/:postId', postIdValidation, paginationValidation, getCommentsByPost)
+router.get('/post/:postId', checkAuth, postIdValidation, paginationValidation, getCommentsByPost)
 router.put('/:commentId', checkAuth, commentIdValidation, updateCommentValidation, updateComment)
 router.delete('/:commentId', checkAuth, commentIdValidation, deleteComment)
 
