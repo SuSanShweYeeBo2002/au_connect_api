@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi'
-import { checkValidation } from './utils'
+import { checkValidation } from './utils.js'
 
 export const signupValidation = (req, res, next) => {
   const { email, password } = req.body
