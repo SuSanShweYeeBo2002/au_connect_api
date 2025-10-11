@@ -3,7 +3,7 @@ import express from 'express'
 import {
   signupValidation,
   signinValidation
-} from '../validations/user.validation'
+} from '../validations/user.validation.js'
 
 import {
   signup,

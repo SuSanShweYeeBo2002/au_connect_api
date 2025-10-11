@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-import config from '../config'
+import config from '../config/index.js'
 
 async function setupMongoose () {
   mongoose.Promise = global.Promise
