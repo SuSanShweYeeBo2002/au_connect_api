@@ -4,6 +4,10 @@ import config from '../config/index.js'
 
 async function setupMongoose () {
   mongoose.Promise = global.Promise
+  
+  // Set strictQuery to false to suppress deprecation warning
+  mongoose.set('strictQuery', false)
+  
   ;(async () => {
     await mongoose.connect(config.db)
   })()

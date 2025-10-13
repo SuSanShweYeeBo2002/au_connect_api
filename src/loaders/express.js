@@ -83,6 +83,20 @@ async function setupExpress () {
     })
   })
 
+  // Socket debug endpoint (will be populated after socket initialization)
+  app.use('/debug/sockets', (req, res) => {
+    const connectedUsers = req.app.get('connectedUsers') || new Map();
+    res.status(200).json({
+      status: 'success',
+      connectedUsers: Array.from(connectedUsers.entries()).map(([userId, socketId]) => ({
+        userId,
+        socketId
+      })),
+      totalConnected: connectedUsers.size,
+      timestamp: new Date().toISOString()
+    })
+  })
+
   // app.use('/api' + '/*', checkAuth)
 
   // const dir = path.join(__dirname, '../routes/*.js')

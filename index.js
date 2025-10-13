@@ -12,6 +12,17 @@ const server = http.createServer(app)
 // Initialize Socket.IO
 const io = initializeSocket(server)
 
-server.listen(process.env.PORT || config.port)
+// Make connected users available to express app for debug routes
+if (server.connectedUsers) {
+  app.set('connectedUsers', server.connectedUsers)
+}
+
+const port = process.env.PORT || config.port
+server.listen(port, () => {
+  console.log(`🚀 Server is running on port ${port}`)
+  console.log(`📊 Debug endpoint: http://localhost:${port}/debug/sockets`)
+  console.log(`🏥 Health check: http://localhost:${port}/health`)
+  console.log(`📄 API docs: http://localhost:${port}/docs`)
+})
 
 export default server
