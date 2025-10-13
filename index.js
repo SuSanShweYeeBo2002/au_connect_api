@@ -12,10 +12,9 @@ const server = http.createServer(app)
 // Initialize Socket.IO
 const io = initializeSocket(server)
 
-// Make connected users available to express app for debug routes
-if (server.connectedUsers) {
-  app.set('connectedUsers', server.connectedUsers)
-}
+// Make Socket.IO and connected users available to express app
+app.set('io', io)
+app.set('connectedUsers', server.connectedUsers || new Map())
 
 const port = process.env.PORT || config.port
 server.listen(port, () => {

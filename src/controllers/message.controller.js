@@ -12,6 +12,22 @@ async function sendMessage(req, res, next) {
     const senderId = req.userData.id
 
     const message = await sendMessageService(senderId, receiverId, content)
+    
+    // Get Socket.IO instance and connected users from app
+    const io = req.app.get('io')
+    const connectedUsers = req.app.get('connectedUsers')
+    
+    // Broadcast to receiver via WebSocket if they're online
+    if (io && connectedUsers) {
+      const receiverSocketId = connectedUsers.get(receiverId)
+      if (receiverSocketId) {
+        console.log('📨 HTTP: Broadcasting to receiver via WebSocket:', receiverId)
+        io.to(receiverSocketId).emit('receive_message', message)
+      } else {
+        console.log('👻 HTTP: Receiver not online for WebSocket:', receiverId)
+      }
+    }
+    
     res.status(201).send({
       status: 'success',
       message: 'Message sent successfully',

@@ -50,26 +50,25 @@ const initializeSocket = (server) => {
         console.log('📤 Message received:', {
           from: socket.userId,
           to: data.receiverId,
-          content: data.content?.substring(0, 50) + '...'
+          content: data.content?.substring(0, 50) + '...',
+          senderSocket: socket.id
         });
         
         const { receiverId, content } = data;
-        const message = await messageService.sendMessage(socket.userId, receiverId, content);
         
-        console.log('💾 Message saved to database:', message._id);
-        
-        // Send to receiver if online
-        const receiverSocketId = connectedUsers.get(receiverId);
-        if (receiverSocketId) {
-          console.log('📨 Sending to receiver:', receiverId, '| Socket:', receiverSocketId);
-          io.to(receiverSocketId).emit('receive_message', message);
-        } else {
-          console.log('👻 Receiver not online:', receiverId);
+        // Validate that sender and receiver are different
+        if (receiverId === socket.userId) {
+          console.log('🚫 Cannot send message to self');
+          socket.emit('error', { message: 'Cannot send message to yourself' });
+          return;
         }
         
-        // Send back to sender
-        console.log('✅ Confirming message sent to sender');
-        socket.emit('message_sent', message);
+        // DISABLED: Socket message creation to prevent duplication
+        // Messages are now sent via HTTP API which broadcasts via WebSocket
+        console.log('� Socket message creation disabled - use HTTP API instead');
+        socket.emit('error', { 
+          message: 'Use HTTP API for sending messages. Socket is for real-time features only.' 
+        });
       } catch (error) {
         console.log('❌ Message error:', error.message);
         socket.emit('error', { message: error.message });
