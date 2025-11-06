@@ -144,18 +144,6 @@ async function voteOnPoll(pollId, optionIndex, userId) {
       throw err
     }
     
-    // Check if user has already voted
-    const hasVoted = poll.options.some(option => 
-      option.voters.some(voterId => voterId.toString() === userId.toString())
-    )
-    
-    if (hasVoted) {
-      const err = new Error()
-      err.message = 'You have already voted on this poll'
-      err.status = 400
-      throw err
-    }
-    
     // Validate option index
     if (optionIndex < 0 || optionIndex >= poll.options.length) {
       const err = new Error()
@@ -164,10 +152,42 @@ async function voteOnPoll(pollId, optionIndex, userId) {
       throw err
     }
     
-    // Get the option by index
-    const option = poll.options[optionIndex]
+    // Check if user has already voted and find their previous vote
+    let previousVoteIndex = null
+    poll.options.forEach((option, index) => {
+      const voterIndex = option.voters.findIndex(
+        voterId => voterId.toString() === userId.toString()
+      )
+      if (voterIndex !== -1) {
+        previousVoteIndex = index
+      }
+    })
     
-    // Add vote
+    // If user already voted for the same option, do nothing
+    if (previousVoteIndex === optionIndex) {
+      const updatedPoll = await Poll.findById(pollId)
+        .populate('author', 'email')
+        .populate('options.voters', 'email')
+      
+      const pollObj = updatedPoll.toObject()
+      pollObj.hasVoted = true
+      pollObj.votedOptionIndex = optionIndex
+      
+      return pollObj
+    }
+    
+    // If user voted for a different option, remove the old vote
+    if (previousVoteIndex !== null) {
+      const previousOption = poll.options[previousVoteIndex]
+      previousOption.voters = previousOption.voters.filter(
+        voterId => voterId.toString() !== userId.toString()
+      )
+      previousOption.votes -= 1
+      poll.totalVotes -= 1
+    }
+    
+    // Add new vote
+    const option = poll.options[optionIndex]
     option.votes += 1
     option.voters.push(userId)
     poll.totalVotes += 1
