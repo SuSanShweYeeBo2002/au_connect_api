@@ -32,9 +32,10 @@ async function getAllPolls(page = 1, limit = 10, userId = null) {
   try {
     const skip = (page - 1) * limit
     
-    // Get polls
+    // Get polls and populate voters with user data
     const polls = await Poll.find()
       .populate('author', 'email')
+      .populate('options.voters', 'email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -87,6 +88,7 @@ async function getPollById(pollId, userId = null) {
   try {
     const poll = await Poll.findById(pollId)
       .populate('author', 'email')
+      .populate('options.voters', 'email')
     
     if (!poll) {
       const err = new Error()
@@ -172,9 +174,10 @@ async function voteOnPoll(pollId, optionIndex, userId) {
     
     await poll.save()
     
-    // Return updated poll with user vote status
+    // Return updated poll with user vote status and populated voters
     const updatedPoll = await Poll.findById(pollId)
       .populate('author', 'email')
+      .populate('options.voters', 'email')
     
     const pollObj = updatedPoll.toObject()
     pollObj.hasVoted = true
