@@ -69,7 +69,8 @@ async function setupExpress () {
           comments: '/comments',
           likes: '/likes',
           messages: '/messages',
-          blogs: '/blogs'
+          blogs: '/blogs',
+          polls: '/polls'
         }
       }
     })
