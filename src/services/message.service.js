@@ -1,7 +1,17 @@
 import Message from '../models/message.js'
+import { checkIfBlockedService } from './block.service.js'
 
 async function sendMessage(senderId, receiverId, content) {
   try {
+    // Check if either user has blocked the other
+    const isBlocked = await checkIfBlockedService(senderId, receiverId)
+    if (isBlocked) {
+      const err = new Error()
+      err.message = 'Cannot send message. User is blocked or has blocked you.'
+      err.status = 403
+      throw err
+    }
+    
     const message = await new Message({
       sender: senderId,
       receiver: receiverId,

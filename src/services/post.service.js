@@ -1,5 +1,6 @@
 import Post from '../models/post.js'
 import Like from '../models/like.js'
+import { getBlockedUserIdsService, getUsersWhoBlockedMeService } from './block.service.js'
 
 async function createPost(authorId, content, image = null) {
   try {
@@ -21,13 +22,27 @@ async function createPost(authorId, content, image = null) {
 async function getAllPosts(page = 1, limit = 10, userId = null) {
   try {
     const skip = (page - 1) * limit
-    const posts = await Post.find()
+    
+    // Get blocked users and users who blocked current user
+    let excludedUserIds = []
+    if (userId) {
+      const blockedByMe = await getBlockedUserIdsService(userId)
+      const whoBlockedMe = await getUsersWhoBlockedMeService(userId)
+      excludedUserIds = [...blockedByMe, ...whoBlockedMe]
+    }
+    
+    // Build query to exclude posts from blocked users
+    const query = excludedUserIds.length > 0 
+      ? { author: { $nin: excludedUserIds } }
+      : {}
+    
+    const posts = await Post.find(query)
       .populate('author', 'email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
     
-    const totalPosts = await Post.countDocuments()
+    const totalPosts = await Post.countDocuments(query)
     
     // If userId is provided, check which posts are liked by the user
     let postsWithLikeStatus = posts
@@ -80,6 +95,20 @@ async function getPostById(postId, userId = null) {
       err.message = 'Post not found'
       err.status = 404
       throw err
+    }
+    
+    // Check if post author is blocked or has blocked current user
+    if (userId) {
+      const blockedByMe = await getBlockedUserIdsService(userId)
+      const whoBlockedMe = await getUsersWhoBlockedMeService(userId)
+      const authorId = post.author._id.toString()
+      
+      if (blockedByMe.includes(authorId) || whoBlockedMe.includes(authorId)) {
+        const err = new Error()
+        err.message = 'Post not found'
+        err.status = 404
+        throw err
+      }
     }
     
     // If userId is provided, check if user has liked this post
