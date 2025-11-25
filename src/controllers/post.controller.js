@@ -3,7 +3,8 @@ import {
   getAllPosts as getAllPostsService,
   getPostById as getPostByIdService,
   updatePost as updatePostService,
-  deletePost as deletePostService
+  deletePost as deletePostService,
+  getPostsByAuthor as getPostsByAuthorService
 } from '../services/post.service.js'
 
 async function createPost(req, res, next) {
@@ -88,10 +89,30 @@ async function deletePost(req, res, next) {
   }
 }
 
+async function getPostsByAuthor(req, res, next) {
+  try {
+    const { authorId } = req.params
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const userId = req.userData.id // Always available due to checkAuth middleware
+
+    const result = await getPostsByAuthorService(authorId, page, limit, userId)
+    res.status(200).send({
+      status: 'success',
+      message: 'Posts retrieved successfully',
+      data: result.posts,
+      pagination: result.pagination
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export {
   createPost,
   getAllPosts,
   getPostById,
   updatePost,
-  deletePost
+  deletePost,
+  getPostsByAuthor
 }

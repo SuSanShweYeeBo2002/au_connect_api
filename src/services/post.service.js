@@ -146,10 +146,63 @@ async function deletePost(postId, authorId) {
   }
 }
 
+async function getPostsByAuthor(authorId, page = 1, limit = 10, userId = null) {
+  try {
+    const skip = (page - 1) * limit
+    const posts = await Post.find({ author: authorId })
+      .populate('author', 'email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+    
+    const totalPosts = await Post.countDocuments({ author: authorId })
+    
+    // If userId is provided, check which posts are liked by the user
+    let postsWithLikeStatus = posts
+    if (userId) {
+      // Get all post IDs
+      const postIds = posts.map(post => post._id)
+      
+      // Find likes by this user for these posts
+      const userLikes = await Like.find({
+        postId: { $in: postIds },
+        userId: userId
+      }).select('postId')
+      
+      // Create a Set of liked post IDs for quick lookup
+      const likedPostIds = new Set(userLikes.map(like => like.postId.toString()))
+      
+      // Add isLikedByUser field to each post
+      postsWithLikeStatus = posts.map(post => {
+        const postObj = post.toObject()
+        postObj.isLikedByUser = likedPostIds.has(post._id.toString())
+        return postObj
+      })
+    }
+    
+    return {
+      posts: postsWithLikeStatus,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        totalPosts,
+        hasNext: page < Math.ceil(totalPosts / limit),
+        hasPrev: page > 1
+      }
+    }
+  } catch (error) {
+    const err = new Error()
+    err.message = error.message
+    err.status = error.status || 500
+    throw err
+  }
+}
+
 export {
   createPost,
   getAllPosts,
   getPostById,
   updatePost,
-  deletePost
+  deletePost,
+  getPostsByAuthor
 }

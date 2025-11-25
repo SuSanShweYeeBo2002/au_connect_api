@@ -64,9 +64,26 @@ const paginationValidation = (req, res, next) => {
   next()
 }
 
+// Validation for authorId parameter
+const authorIdValidation = (req, res, next) => {
+  const schema = Joi.object({
+    authorId: Joi.string().hex().length(24).required()
+  })
+
+  const { error } = schema.validate(req.params)
+  if (error) {
+    const err = new Error()
+    err.message = 'Invalid author ID'
+    err.status = 400
+    return next(err)
+  }
+  next()
+}
+
 export {
   createPostValidation,
   updatePostValidation,
   postIdValidation,
-  paginationValidation
+  paginationValidation,
+  authorIdValidation
 }
