@@ -2,32 +2,38 @@ const env = process.env.NODE_ENV || 'local'
 
 const config = {
   test: {
-    port: 8383,
-    db: 'mongodb+srv://u6511106_db_user:199406jb@cluster0.coa8zpe.mongodb.net/au_connect?retryWrites=true&w=majority&appName=Cluster0',
-    jwtSecret: 'secret'
+    port: process.env.PORT || 8383,
+    db: process.env.MONGODB_URI,
+    jwtSecret: process.env.JWT_SECRET
   },
   local: {
-    port: 8383,
-    db: 'mongodb+srv://u6511106_db_user:199406jb@cluster0.coa8zpe.mongodb.net/au_connect?retryWrites=true&w=majority&appName=Cluster0',
-    jwtSecret: 'secret'
+    port: process.env.PORT || 8383,
+    db: process.env.MONGODB_URI,
+    jwtSecret: process.env.JWT_SECRET
   },
   dev: {
-    port: 8383,
-    db: 'mongodb+srv://u6511106_db_user:199406jb@cluster0.coa8zpe.mongodb.net/au_connect?retryWrites=true&w=majority&appName=Cluster0',
-    jwtSecret: 'secret'
+    port: process.env.PORT || 8383,
+    db: process.env.MONGODB_URI,
+    jwtSecret: process.env.JWT_SECRET
   },
   staging: {
-    port: 8383,
-    db: 'mongodb+srv://u6511106_db_user:199406jb@cluster0.coa8zpe.mongodb.net/au_connect?retryWrites=true&w=majority&appName=Cluster0',
-    jwtSecret: 'secret'
+    port: process.env.PORT || 8383,
+    db: process.env.MONGODB_URI,
+    jwtSecret: process.env.JWT_SECRET
   },
   production: {
-    port: 8383,
-    db: 'mongodb+srv://u6511106_db_user:199406jb@cluster0.coa8zpe.mongodb.net/au_connect?retryWrites=true&w=majority&appName=Cluster0',
-    jwtSecret: process.env.JWT_SECRET || 'secret'
+    port: process.env.PORT || 8383,
+    db: process.env.MONGODB_URI,
+    jwtSecret: process.env.JWT_SECRET
   }
 }
 
 export default {
-  ...config[env]
+  ...config[env],
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION || 'ap-southeast-2',
+    s3BucketName: process.env.AWS_S3_BUCKET_NAME || 'au-connect-uploads'
+  }
 }

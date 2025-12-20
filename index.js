@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import http from 'http'
 import setupExpress from './src/loaders/express.js'
 import setupMongoose from './src/loaders/mongoose.js'

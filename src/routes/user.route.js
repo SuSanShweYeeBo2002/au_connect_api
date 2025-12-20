@@ -13,10 +13,13 @@ import {
   getUserList,
   getUserById,
   getCurrentUser,
-  updateUser
+  updateUser,
+  uploadProfileImage,
+  deleteProfileImage
 } from '../controllers/user.controller.js'
 
 import { checkAuth } from '../middlewares/auth.middleware.js'
+import { uploadToS3 } from '../utils/s3.js'
 
 const router = express.Router()
 
@@ -25,6 +28,8 @@ router.post('/signin', signinValidation, signin)
 router.get('/list', checkAuth, getUserList)
 router.get('/me', checkAuth, getCurrentUser)
 router.put('/me', checkAuth, updateUserValidation, updateUser)
+router.post('/me/profile-image', checkAuth, uploadToS3.single('profileImage'), uploadProfileImage)
+router.delete('/me/profile-image', checkAuth, deleteProfileImage)
 router.get('/:userId', checkAuth, userIdValidation, getUserById)
 
 export default app => {
