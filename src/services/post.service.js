@@ -11,7 +11,7 @@ async function createPost(authorId, content, image = null) {
       image
     }).save()
     
-    return post.populate('author', 'email')
+    return post.populate('author', 'email profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -38,7 +38,7 @@ async function getAllPosts(page = 1, limit = 10, userId = null) {
       : {}
     
     const posts = await Post.find(query)
-      .populate('author', 'email')
+      .populate('author', 'email profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -89,7 +89,7 @@ async function getAllPosts(page = 1, limit = 10, userId = null) {
 async function getPostById(postId, userId = null) {
   try {
     const post = await Post.findById(postId)
-      .populate('author', 'email')
+      .populate('author', 'email profileImage')
     
     if (!post) {
       const err = new Error()
@@ -157,7 +157,7 @@ async function updatePost(postId, authorId, content, image = null) {
     }
     
     await post.save()
-    return post.populate('author', 'email')
+    return post.populate('author', 'email profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -199,7 +199,7 @@ async function getPostsByAuthor(authorId, page = 1, limit = 10, userId = null) {
   try {
     const skip = (page - 1) * limit
     const posts = await Post.find({ author: authorId })
-      .populate('author', 'email')
+      .populate('author', 'email profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
