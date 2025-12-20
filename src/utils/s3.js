@@ -26,7 +26,7 @@ const fileFilter = (req, file, cb) => {
   }
 }
 
-// Multer upload configuration for S3
+// Multer upload configuration for profile images
 export const uploadToS3 = multer({
   storage: multerS3({
     s3: s3Client,
@@ -39,6 +39,27 @@ export const uploadToS3 = multer({
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
       const ext = path.extname(file.originalname)
       cb(null, `profile-images/${uniqueSuffix}${ext}`)
+    }
+  }),
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+})
+
+// Multer upload configuration for post images
+export const uploadPostImage = multer({
+  storage: multerS3({
+    s3: s3Client,
+    bucket: config.aws.s3BucketName,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname })
+    },
+    key: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      const ext = path.extname(file.originalname)
+      cb(null, `post-images/${uniqueSuffix}${ext}`)
     }
   }),
   fileFilter: fileFilter,
@@ -67,4 +88,4 @@ export const deleteFromS3 = async (fileUrl) => {
   }
 }
 
-export default { uploadToS3, deleteFromS3, s3Client }
+export default { uploadToS3, uploadPostImage, deleteFromS3, s3Client }

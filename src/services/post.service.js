@@ -1,6 +1,7 @@
 import Post from '../models/post.js'
 import Like from '../models/like.js'
 import { getBlockedUserIdsService, getUsersWhoBlockedMeService } from './block.service.js'
+import { deleteFromS3 } from '../utils/s3.js'
 
 async function createPost(authorId, content, image = null) {
   try {
@@ -141,6 +142,16 @@ async function updatePost(postId, authorId, content, image = null) {
     }
     
     post.content = content
+    
+    // If new image is uploaded, delete old image from S3
+    if (image !== null && post.image) {
+      try {
+        await deleteFromS3(post.image)
+      } catch (error) {
+        console.error('Error deleting old post image:', error)
+      }
+    }
+    
     if (image !== null) {
       post.image = image
     }
@@ -164,6 +175,15 @@ async function deletePost(postId, authorId) {
       err.message = 'Post not found or unauthorized'
       err.status = 404
       throw err
+    }
+    
+    // Delete image from S3 if exists
+    if (post.image) {
+      try {
+        await deleteFromS3(post.image)
+      } catch (error) {
+        console.error('Error deleting post image from S3:', error)
+      }
     }
     
     return { message: 'Post deleted successfully' }
