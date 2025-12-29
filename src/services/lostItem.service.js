@@ -1,10 +1,11 @@
 import LostItem from '../models/lostItem.js'
 
-async function createLostItem(reporterId, itemData) {
+async function createLostItem(reporterId, itemData, imageUrls) {
   try {
     const lostItem = await new LostItem({
       reporter: reporterId,
-      ...itemData
+      ...itemData,
+      ...(imageUrls && imageUrls.length > 0 && { images: imageUrls })
     }).save()
     
     return lostItem.populate('reporter', 'email')
@@ -90,7 +91,7 @@ async function getLostItemById(itemId) {
   }
 }
 
-async function updateLostItem(itemId, reporterId, updateData) {
+async function updateLostItem(itemId, reporterId, updateData, imageUrls) {
   try {
     const lostItem = await LostItem.findById(itemId)
     
@@ -109,7 +110,17 @@ async function updateLostItem(itemId, reporterId, updateData) {
       throw err
     }
     
-    // Update the item
+    // Handle images update
+    if (updateData.images !== undefined || imageUrls.length > 0) {
+      // If images array is sent in body (existing images to keep)
+      const existingImagesToKeep = Array.isArray(updateData.images) ? updateData.images : []
+      // Combine kept images with new uploaded images
+      lostItem.images = [...existingImagesToKeep, ...imageUrls]
+      // Remove images field from updateData to avoid overwriting
+      delete updateData.images
+    }
+    
+    // Update other fields
     Object.assign(lostItem, updateData)
     await lostItem.save()
     

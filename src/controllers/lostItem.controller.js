@@ -11,8 +11,9 @@ async function createLostItem(req, res, next) {
   try {
     const reporterId = req.userData.id
     const itemData = req.body
+    const imageUrls = req.files ? req.files.map(file => file.location) : []
 
-    const lostItem = await createLostItemService(reporterId, itemData)
+    const lostItem = await createLostItemService(reporterId, itemData, imageUrls)
     res.status(201).send({
       status: 'success',
       message: 'Lost item created successfully',
@@ -67,8 +68,9 @@ async function updateLostItem(req, res, next) {
     const { itemId } = req.params
     const reporterId = req.userData.id
     const updateData = req.body
+    const imageUrls = req.files ? req.files.map(file => file.location) : []
 
-    const lostItem = await updateLostItemService(itemId, reporterId, updateData)
+    const lostItem = await updateLostItemService(itemId, reporterId, updateData, imageUrls)
     res.status(200).send({
       status: 'success',
       message: 'Lost item updated successfully',

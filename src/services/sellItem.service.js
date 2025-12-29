@@ -1,10 +1,11 @@
 import SellItem from '../models/sellItem.js'
 
-async function createSellItem(sellerId, itemData) {
+async function createSellItem(sellerId, itemData, imageUrls) {
   try {
     const sellItem = await new SellItem({
       seller: sellerId,
-      ...itemData
+      ...itemData,
+      ...(imageUrls && imageUrls.length > 0 && { images: imageUrls })
     }).save()
     
     return sellItem.populate('seller', 'email')
@@ -99,7 +100,7 @@ async function getSellItemById(itemId) {
   }
 }
 
-async function updateSellItem(itemId, sellerId, updateData) {
+async function updateSellItem(itemId, sellerId, updateData, imageUrls) {
   try {
     const sellItem = await SellItem.findById(itemId)
     
@@ -118,7 +119,17 @@ async function updateSellItem(itemId, sellerId, updateData) {
       throw err
     }
     
-    // Update the item
+    // Handle images update
+    if (updateData.images !== undefined || imageUrls.length > 0) {
+      // If images array is sent in body (existing images to keep)
+      const existingImagesToKeep = Array.isArray(updateData.images) ? updateData.images : []
+      // Combine kept images with new uploaded images
+      sellItem.images = [...existingImagesToKeep, ...imageUrls]
+      // Remove images field from updateData to avoid overwriting
+      delete updateData.images
+    }
+    
+    // Update other fields
     Object.assign(sellItem, updateData)
     await sellItem.save()
     

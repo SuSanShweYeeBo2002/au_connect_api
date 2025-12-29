@@ -11,8 +11,9 @@ async function createSellItem(req, res, next) {
   try {
     const sellerId = req.userData.id
     const itemData = req.body
+    const imageUrls = req.files ? req.files.map(file => file.location) : []
 
-    const sellItem = await createSellItemService(sellerId, itemData)
+    const sellItem = await createSellItemService(sellerId, itemData, imageUrls)
     res.status(201).send({
       status: 'success',
       message: 'Sell item created successfully',
@@ -69,8 +70,9 @@ async function updateSellItem(req, res, next) {
     const { itemId } = req.params
     const sellerId = req.userData.id
     const updateData = req.body
+    const imageUrls = req.files ? req.files.map(file => file.location) : []
 
-    const sellItem = await updateSellItemService(itemId, sellerId, updateData)
+    const sellItem = await updateSellItemService(itemId, sellerId, updateData, imageUrls)
     res.status(200).send({
       status: 'success',
       message: 'Sell item updated successfully',
