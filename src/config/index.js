@@ -35,5 +35,17 @@ export default {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION || 'ap-southeast-2',
     s3BucketName: process.env.AWS_S3_BUCKET_NAME || 'au-connect-uploads'
-  }
+  },
+  email: {
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: process.env.EMAIL_PORT || 587,
+    secure: process.env.EMAIL_SECURE === 'true',
+    user: process.env.EMAIL_USER,
+    password: process.env.EMAIL_PASSWORD,
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER
+  },
+  allowedEmailDomains: process.env.ALLOWED_EMAIL_DOMAINS 
+    ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim()) 
+    : ['student.university.edu', 'university.edu'], // Default domains - change this!
+  appUrl: process.env.APP_URL || 'http://localhost:8383'
 }

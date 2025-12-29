@@ -3,9 +3,18 @@ import jwt from 'jsonwebtoken'
 
 import User from '../models/user.js'
 import { deleteFromS3 } from '../utils/s3.js'
+import { sendVerificationEmail, validateEmailDomain, generateVerificationToken } from '../utils/email.js'
 
 async function signupService ({ email, password }) {
   try {
+    // Validate email domain
+    if (!validateEmailDomain(email)) {
+      const err = new Error()
+      err.message = 'Email domain not allowed. Please use your university email address.'
+      err.status = 400
+      throw err
+    }
+
     // check if email already exists
     const user = await User.findOne({ email })
     if (user) {
@@ -17,13 +26,30 @@ async function signupService ({ email, password }) {
 
     const hash = await bcrypt.hash(password, 10)
 
+    // Generate verification token
+    const verificationToken = generateVerificationToken()
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
     // create User
     await new User({
       email,
-      password: hash
+      password: hash,
+      isEmailVerified: false,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: verificationExpires
     }).save()
 
-    return { message: 'User was created successfully.' }
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, verificationToken)
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError)
+      // Don't fail signup if email fails - user can request resend
+    }
+
+    return { 
+      message: 'User was created successfully. Please check your email to verify your account.' 
+    }
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -40,6 +66,14 @@ async function signinService ({ email, password }) {
       const err = new Error()
       err.message = 'Email not found.'
       err.status = 404
+      throw err
+    }
+
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      const err = new Error()
+      err.message = 'Please verify your email address before signing in. Check your email for the verification link.'
+      err.status = 403
       throw err
     }
 
@@ -234,6 +268,72 @@ async function deleteProfileImageService(userId) {
   }
 }
 
+async function verifyEmailService(token) {
+  try {
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    })
+
+    if (!user) {
+      const err = new Error()
+      err.message = 'Invalid or expired verification token.'
+      err.status = 400
+      throw err
+    }
+
+    user.isEmailVerified = true
+    user.emailVerificationToken = null
+    user.emailVerificationExpires = null
+    await user.save()
+
+    return { message: 'Email verified successfully. You can now sign in.' }
+  } catch (error) {
+    const err = new Error()
+    err.message = error.message
+    err.status = error.status || 500
+    throw err
+  }
+}
+
+async function resendVerificationEmailService(email) {
+  try {
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      const err = new Error()
+      err.message = 'Email not found.'
+      err.status = 404
+      throw err
+    }
+
+    if (user.isEmailVerified) {
+      const err = new Error()
+      err.message = 'Email is already verified.'
+      err.status = 400
+      throw err
+    }
+
+    // Generate new verification token
+    const verificationToken = generateVerificationToken()
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+    user.emailVerificationToken = verificationToken
+    user.emailVerificationExpires = verificationExpires
+    await user.save()
+
+    // Send verification email
+    await sendVerificationEmail(email, verificationToken)
+
+    return { message: 'Verification email sent. Please check your inbox.' }
+  } catch (error) {
+    const err = new Error()
+    err.message = error.message
+    err.status = error.status || 500
+    throw err
+  }
+}
+
 export {
   signupService,
   signinService,
@@ -242,5 +342,7 @@ export {
   getCurrentUserService,
   updateUserService,
   uploadProfileImageService,
-  deleteProfileImageService
+  deleteProfileImageService,
+  verifyEmailService,
+  resendVerificationEmailService
 }

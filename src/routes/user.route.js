@@ -15,7 +15,9 @@ import {
   getCurrentUser,
   updateUser,
   uploadProfileImage,
-  deleteProfileImage
+  deleteProfileImage,
+  verifyEmail,
+  resendVerificationEmail
 } from '../controllers/user.controller.js'
 
 import { checkAuth } from '../middlewares/auth.middleware.js'
@@ -25,6 +27,8 @@ const router = express.Router()
 
 router.post('/signup', signupValidation, signup)
 router.post('/signin', signinValidation, signin)
+router.get('/verify-email', verifyEmail)
+router.post('/resend-verification', resendVerificationEmail)
 router.get('/list', checkAuth, getUserList)
 router.get('/me', checkAuth, getCurrentUser)
 router.put('/me', checkAuth, updateUserValidation, updateUser)
