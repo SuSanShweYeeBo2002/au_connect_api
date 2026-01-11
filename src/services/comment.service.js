@@ -12,6 +12,14 @@ async function addComment(postId, authorId, content, image = null) {
       throw err
     }
 
+    // Check if post is reported too many times
+    if (post.reportCount > 3) {
+      const err = new Error()
+      err.message = 'Cannot comment on this post'
+      err.status = 403
+      throw err
+    }
+
     // Create comment
     const comment = await new Comment({
       postId,

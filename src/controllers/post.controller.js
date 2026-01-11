@@ -11,9 +11,9 @@ async function createPost(req, res, next) {
   try {
     const { content } = req.body
     const authorId = req.userData.id
-    const imageUrl = req.file ? req.file.location : null
+    const imageUrls = req.files ? req.files.map(file => file.location) : []
 
-    const post = await createPostService(authorId, content, imageUrl)
+    const post = await createPostService(authorId, content, imageUrls)
     res.status(201).send({
       status: 'success',
       message: 'Post created successfully',
@@ -61,11 +61,11 @@ async function getPostById(req, res, next) {
 async function updatePost(req, res, next) {
   try {
     const { postId } = req.params
-    const { content } = req.body
+    const { content, images } = req.body
     const authorId = req.userData.id
-    const imageUrl = req.file ? req.file.location : null
+    const imageUrls = req.files ? req.files.map(file => file.location) : []
 
-    const post = await updatePostService(postId, authorId, content, imageUrl)
+    const post = await updatePostService(postId, authorId, content, images, imageUrls)
     res.status(200).send({
       status: 'success',
       message: 'Post updated successfully',

@@ -13,14 +13,18 @@ const postSchema = new Schema(
       required: true,
       maxlength: 1000
     },
-    image: {
-      type: String // URL to uploaded image
-    },
+    images: [{
+      type: String // URLs to uploaded images
+    }],
     likeCount: {
       type: Number,
       default: 0
     },
     commentCount: {
+      type: Number,
+      default: 0
+    },
+    reportCount: {
       type: Number,
       default: 0
     }

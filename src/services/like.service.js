@@ -12,6 +12,14 @@ async function toggleLike(postId, userId) {
       throw err
     }
 
+    // Check if post is reported too many times
+    if (post.reportCount > 3) {
+      const err = new Error()
+      err.message = 'Cannot like this post'
+      err.status = 403
+      throw err
+    }
+
     // Check if user already liked the post
     const existingLike = await Like.findOne({ postId, userId })
 

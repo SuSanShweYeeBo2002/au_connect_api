@@ -3,12 +3,12 @@ import Like from '../models/like.js'
 import { getBlockedUserIdsService, getUsersWhoBlockedMeService } from './block.service.js'
 import { deleteFromS3 } from '../utils/s3.js'
 
-async function createPost(authorId, content, image = null) {
+async function createPost(authorId, content, imageUrls = []) {
   try {
     const post = await new Post({
       author: authorId,
       content,
-      image
+      images: imageUrls
     }).save()
     
     return post.populate('author', 'email displayName profileImage')
@@ -32,10 +32,14 @@ async function getAllPosts(page = 1, limit = 10, userId = null) {
       excludedUserIds = [...blockedByMe, ...whoBlockedMe]
     }
     
-    // Build query to exclude posts from blocked users
-    const query = excludedUserIds.length > 0 
-      ? { author: { $nin: excludedUserIds } }
-      : {}
+    // Build query to exclude posts from blocked users and reported posts
+    let query = {
+      $or: [{ reportCount: { $exists: false } }, { reportCount: { $lte: 3 } }]
+    }
+    
+    if (excludedUserIds.length > 0) {
+      query.author = { $nin: excludedUserIds }
+    }
     
     const posts = await Post.find(query)
       .populate('author', 'email displayName profileImage')
@@ -98,6 +102,14 @@ async function getPostById(postId, userId = null) {
       throw err
     }
     
+    // Check if post is reported too many times
+    if (post.reportCount > 3) {
+      const err = new Error()
+      err.message = 'Post not available'
+      err.status = 404
+      throw err
+    }
+    
     // Check if post author is blocked or has blocked current user
     if (userId) {
       const blockedByMe = await getBlockedUserIdsService(userId)
@@ -130,7 +142,7 @@ async function getPostById(postId, userId = null) {
   }
 }
 
-async function updatePost(postId, authorId, content, image = null) {
+async function updatePost(postId, authorId, content, existingImages = [], newImageUrls = []) {
   try {
     const post = await Post.findOne({ _id: postId, author: authorId })
     
@@ -143,17 +155,15 @@ async function updatePost(postId, authorId, content, image = null) {
     
     post.content = content
     
-    // If new image is uploaded, delete old image from S3
-    if (image !== null && post.image) {
-      try {
-        await deleteFromS3(post.image)
-      } catch (error) {
-        console.error('Error deleting old post image:', error)
-      }
-    }
-    
-    if (image !== null) {
-      post.image = image
+    // Handle images update
+    if (existingImages !== undefined || newImageUrls.length > 0) {
+      // Parse existingImages if it's a string
+      const imagesToKeep = Array.isArray(existingImages) 
+        ? existingImages 
+        : (typeof existingImages === 'string' ? JSON.parse(existingImages) : [])
+      
+      // Combine kept images with new uploaded images
+      post.images = [...imagesToKeep, ...newImageUrls]
     }
     
     await post.save()
@@ -177,12 +187,12 @@ async function deletePost(postId, authorId) {
       throw err
     }
     
-    // Delete image from S3 if exists
-    if (post.image) {
+    // Delete images from S3 if exist
+    if (post.images && post.images.length > 0) {
       try {
-        await deleteFromS3(post.image)
+        await Promise.all(post.images.map(imageUrl => deleteFromS3(imageUrl)))
       } catch (error) {
-        console.error('Error deleting post image from S3:', error)
+        console.error('Error deleting post images from S3:', error)
       }
     }
     
@@ -198,13 +208,19 @@ async function deletePost(postId, authorId) {
 async function getPostsByAuthor(authorId, page = 1, limit = 10, userId = null) {
   try {
     const skip = (page - 1) * limit
-    const posts = await Post.find({ author: authorId })
+    const posts = await Post.find({ 
+      author: authorId,
+      $or: [{ reportCount: { $exists: false } }, { reportCount: { $lte: 3 } }]
+    })
       .populate('author', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
     
-    const totalPosts = await Post.countDocuments({ author: authorId })
+    const totalPosts = await Post.countDocuments({ 
+      author: authorId,
+      $or: [{ reportCount: { $exists: false } }, { reportCount: { $lte: 3 } }]
+    })
     
     // If userId is provided, check which posts are liked by the user
     let postsWithLikeStatus = posts
