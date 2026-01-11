@@ -49,7 +49,10 @@ async function createStudySession(creatorId, sessionData) {
 async function getAllStudySessions(page = 1, limit = 10, filters = {}, userId = null) {
   try {
     const skip = (page - 1) * limit
-    const query = { isActive: true }
+    const query = { 
+      isActive: true,
+      scheduledDate: { $gte: new Date() } // Only show sessions that haven't expired
+    }
 
     // Add filters if provided
     if (filters.status) {
