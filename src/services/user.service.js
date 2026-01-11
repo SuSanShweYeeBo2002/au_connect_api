@@ -99,7 +99,9 @@ async function signinService ({ email, password }) {
     return { 
       token,
       userId: user._id,
-      email: user.email
+      email: user.email,
+      displayName: user.displayName,
+      profileImage: user.profileImage
     }
   } catch (error) {
     const err = new Error()
@@ -114,7 +116,7 @@ async function getUserListService(currentUserId) {
     // Get all users except the current user
     const users = await User.find(
       { _id: { $ne: currentUserId } },
-      { email: 1 } // Only return _id and email fields
+      { email: 1, displayName: 1, profileImage: 1 } // Return _id, email, displayName and profileImage fields
     ).sort({ email: 1 })
 
     return users

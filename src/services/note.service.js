@@ -8,7 +8,7 @@ async function createNote(authorId, title, content) {
       content
     }).save()
     
-    return note.populate('author', 'email')
+    return note.populate('author', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -23,7 +23,7 @@ async function getAllNotes(page = 1, limit = 10, userId) {
     
     // Only get notes for the authenticated user
     const notes = await Note.find({ author: userId })
-      .populate('author', 'email')
+      .populate('author', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -51,7 +51,7 @@ async function getAllNotes(page = 1, limit = 10, userId) {
 async function getNoteById(noteId, userId) {
   try {
     const note = await Note.findOne({ _id: noteId, author: userId })
-      .populate('author', 'email')
+      .populate('author', 'email displayName profileImage')
     
     if (!note) {
       const err = new Error()
@@ -84,7 +84,7 @@ async function updateNote(noteId, authorId, title, content) {
     note.content = content
     
     await note.save()
-    return note.populate('author', 'email')
+    return note.populate('author', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message

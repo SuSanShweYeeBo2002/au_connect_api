@@ -23,7 +23,7 @@ async function addComment(postId, authorId, content, image = null) {
     // Increment comment count on post
     await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } })
 
-    return comment.populate('author', 'email')
+    return comment.populate('author', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -36,7 +36,7 @@ async function getCommentsByPost(postId, page = 1, limit = 10) {
   try {
     const skip = (page - 1) * limit
     const comments = await Comment.find({ postId })
-      .populate('author', 'email')
+      .populate('author', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -78,7 +78,7 @@ async function updateComment(commentId, authorId, content, image = null) {
     }
     await comment.save()
 
-    return comment.populate('author', 'email')
+    return comment.populate('author', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message

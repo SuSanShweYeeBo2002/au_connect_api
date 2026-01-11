@@ -19,7 +19,7 @@ async function createPoll(authorId, question, options, expiresAt = null) {
       isExpired: false
     }).save()
     
-    return poll.populate('author', 'email')
+    return poll.populate('author', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -34,8 +34,8 @@ async function getAllPolls(page = 1, limit = 10, userId = null) {
     
     // Get polls and populate voters with user data
     const polls = await Poll.find()
-      .populate('author', 'email')
-      .populate('options.voters', 'email')
+      .populate('author', 'email displayName profileImage')
+      .populate('options.voters', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -87,8 +87,8 @@ async function getAllPolls(page = 1, limit = 10, userId = null) {
 async function getPollById(pollId, userId = null) {
   try {
     const poll = await Poll.findById(pollId)
-      .populate('author', 'email')
-      .populate('options.voters', 'email')
+      .populate('author', 'email displayName profileImage')
+      .populate('options.voters', 'email displayName profileImage')
     
     if (!poll) {
       const err = new Error()

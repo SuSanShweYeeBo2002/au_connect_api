@@ -34,7 +34,8 @@ export const signinValidation = (req, res, next) => {
 export const updateUserValidation = (req, res, next) => {
   const schema = Joi.object({
     email: Joi.string().email().optional(),
-    password: Joi.string().min(6).optional()
+    password: Joi.string().min(6).optional(),
+    displayName: Joi.string().min(1).max(50).optional()
   }).min(1)
 
   const { error } = schema.validate(req.body)

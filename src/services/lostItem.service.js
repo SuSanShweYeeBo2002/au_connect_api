@@ -8,7 +8,7 @@ async function createLostItem(reporterId, itemData, imageUrls) {
       ...(imageUrls && imageUrls.length > 0 && { images: imageUrls })
     }).save()
     
-    return lostItem.populate('reporter', 'email')
+    return lostItem.populate('reporter', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -45,7 +45,7 @@ async function getAllLostItems(page = 1, limit = 10, filters = {}) {
     }
     
     const lostItems = await LostItem.find(query)
-      .populate('reporter', 'email')
+      .populate('reporter', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -73,7 +73,7 @@ async function getAllLostItems(page = 1, limit = 10, filters = {}) {
 async function getLostItemById(itemId) {
   try {
     const lostItem = await LostItem.findById(itemId)
-      .populate('reporter', 'email')
+      .populate('reporter', 'email displayName profileImage')
     
     if (!lostItem) {
       const err = new Error()
@@ -124,7 +124,7 @@ async function updateLostItem(itemId, reporterId, updateData, imageUrls) {
     Object.assign(lostItem, updateData)
     await lostItem.save()
     
-    return lostItem.populate('reporter', 'email')
+    return lostItem.populate('reporter', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -168,7 +168,7 @@ async function getLostItemsByReporter(reporterId, page = 1, limit = 10) {
     const skip = (page - 1) * limit
     
     const lostItems = await LostItem.find({ reporter: reporterId })
-      .populate('reporter', 'email')
+      .populate('reporter', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

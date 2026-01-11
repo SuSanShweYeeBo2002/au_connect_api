@@ -17,7 +17,7 @@ async function sendMessage(senderId, receiverId, content) {
       receiver: receiverId,
       content
     }).save()
-    return message.populate(['sender', 'receiver'])
+    return message.populate([{ path: 'sender', select: 'email displayName profileImage' }, { path: 'receiver', select: 'email displayName profileImage' }])
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -35,7 +35,7 @@ async function getConversation(user1Id, user2Id) {
       ]
     })
       .sort({ createdAt: 1 })
-      .populate(['sender', 'receiver'])
+      .populate([{ path: 'sender', select: 'email displayName profileImage' }, { path: 'receiver', select: 'email displayName profileImage' }])
     return messages
   } catch (error) {
     const err = new Error()
@@ -51,7 +51,7 @@ async function getUserConversations(userId) {
       $or: [{ sender: userId }, { receiver: userId }]
     })
       .sort({ createdAt: -1 })
-      .populate(['sender', 'receiver'])
+      .populate([{ path: 'sender', select: 'email displayName profileImage' }, { path: 'receiver', select: 'email displayName profileImage' }])
 
     const conversations = {}
     messages.forEach((message) => {

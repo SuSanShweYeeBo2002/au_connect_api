@@ -8,7 +8,7 @@ async function createSellItem(sellerId, itemData, imageUrls) {
       ...(imageUrls && imageUrls.length > 0 && { images: imageUrls })
     }).save()
     
-    return sellItem.populate('seller', 'email')
+    return sellItem.populate('seller', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -54,7 +54,7 @@ async function getAllSellItems(page = 1, limit = 10, filters = {}) {
     }
     
     const sellItems = await SellItem.find(query)
-      .populate('seller', 'email')
+      .populate('seller', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -82,7 +82,7 @@ async function getAllSellItems(page = 1, limit = 10, filters = {}) {
 async function getSellItemById(itemId) {
   try {
     const sellItem = await SellItem.findById(itemId)
-      .populate('seller', 'email')
+      .populate('seller', 'email displayName profileImage')
     
     if (!sellItem) {
       const err = new Error()
@@ -133,7 +133,7 @@ async function updateSellItem(itemId, sellerId, updateData, imageUrls) {
     Object.assign(sellItem, updateData)
     await sellItem.save()
     
-    return sellItem.populate('seller', 'email')
+    return sellItem.populate('seller', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -177,7 +177,7 @@ async function getSellItemsBySeller(sellerId, page = 1, limit = 10) {
     const skip = (page - 1) * limit
     
     const sellItems = await SellItem.find({ seller: sellerId })
-      .populate('seller', 'email')
+      .populate('seller', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

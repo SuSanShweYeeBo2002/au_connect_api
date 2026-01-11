@@ -60,7 +60,7 @@ async function getAllStudySessions(page = 1, limit = 10, filters = {}, userId = 
     }
 
     const studySessions = await StudySession.find(query)
-      .populate('creator', 'email')
+      .populate('creator', 'email displayName profileImage')
       .sort({ scheduledDate: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -110,7 +110,7 @@ async function getAllStudySessions(page = 1, limit = 10, filters = {}, userId = 
 async function getStudySessionById(sessionId, userId = null) {
   try {
     const studySession = await StudySession.findById(sessionId)
-      .populate('creator', 'email')
+      .populate('creator', 'email displayName profileImage')
 
     if (!studySession) {
       const err = new Error()
@@ -172,7 +172,7 @@ async function updateStudySession(sessionId, creatorId, updateData) {
     })
 
     await studySession.save()
-    return studySession.populate('creator', 'email')
+    return studySession.populate('creator', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -269,7 +269,7 @@ async function joinStudySession(sessionId, userId) {
     studySession.currentParticipants += 1
     await studySession.save()
 
-    return studySession.populate('creator', 'email')
+    return studySession.populate('creator', 'email displayName profileImage')
   } catch (error) {
     const err = new Error()
     err.message = error.message
@@ -344,7 +344,7 @@ async function getStudySessionParticipants(sessionId, page = 1, limit = 20) {
       sessionId,
       status: 'Joined'
     })
-      .populate('userId', 'email')
+      .populate('userId', 'email displayName profileImage')
       .sort({ joinedAt: 1 })
       .skip(skip)
       .limit(limit)

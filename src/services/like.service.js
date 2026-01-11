@@ -56,7 +56,7 @@ async function getLikesByPost(postId, page = 1, limit = 20) {
   try {
     const skip = (page - 1) * limit
     const likes = await Like.find({ postId })
-      .populate('userId', 'email')
+      .populate('userId', 'email displayName profileImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
