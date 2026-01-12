@@ -41,9 +41,14 @@ async function signupService ({ email, password }) {
 
     // Send verification email
     try {
+      console.log('\n🔄 Signup: Sending verification email to:', email)
       await sendVerificationEmail(email, verificationToken)
+      console.log('✅ Verification email sent successfully')
     } catch (emailError) {
-      console.error('Failed to send verification email:', emailError)
+      console.error('\n⚠️ Failed to send verification email during signup:')
+      console.error('Email:', email)
+      console.error('Error:', emailError.message)
+      console.error('Full error object:', emailError)
       // Don't fail signup if email fails - user can request resend
     }
 

@@ -1,6 +1,17 @@
 import nodemailer from 'nodemailer'
 import config from '../config/index.js'
 
+// Log email configuration (without password)
+console.log('=== Email Configuration ===')
+console.log('Host:', config.email.host)
+console.log('Port:', config.email.port)
+console.log('Secure:', config.email.secure)
+console.log('User:', config.email.user)
+console.log('From:', config.email.from)
+console.log('Password configured:', config.email.password ? 'YES (length: ' + config.email.password.length + ')' : 'NO')
+console.log('App URL:', config.appUrl)
+console.log('==========================')
+
 // Create reusable transporter
 const transporter = nodemailer.createTransport({
   host: config.email.host,
@@ -14,7 +25,12 @@ const transporter = nodemailer.createTransport({
 
 export async function sendVerificationEmail(email, verificationToken) {
   try {
+    console.log('\n📧 Attempting to send verification email...')
+    console.log('To:', email)
+    console.log('Token:', verificationToken)
+    
     const verificationUrl = `${config.appUrl}/users/verify-email?token=${verificationToken}`
+    console.log('Verification URL:', verificationUrl)
     
     const mailOptions = {
       from: config.email.from,
@@ -66,10 +82,26 @@ export async function sendVerificationEmail(email, verificationToken) {
       `
     }
 
-    await transporter.sendMail(mailOptions)
+    console.log('Sending email with options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    })
+    
+    const info = await transporter.sendMail(mailOptions)
+    console.log('✅ Email sent successfully!')
+    console.log('Message ID:', info.messageId)
+    console.log('Response:', info.response)
+    
     return { success: true }
   } catch (error) {
-    console.error('Error sending verification email:', error)
+    console.error('\n❌ ERROR sending verification email:')
+    console.error('Error name:', error.name)
+    console.error('Error message:', error.message)
+    console.error('Error code:', error.code)
+    console.error('Error command:', error.command)
+    console.error('Full error:', error)
+    console.error('Stack trace:', error.stack)
     throw error
   }
 }
