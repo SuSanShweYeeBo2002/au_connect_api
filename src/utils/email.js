@@ -1,45 +1,23 @@
-import nodemailer from 'nodemailer'
 import sgMail from '@sendgrid/mail'
 import config from '../config/index.js'
 
-// Determine email provider
-const usesSendGrid = !!config.email.sendGridApiKey
-
-// Log email configuration (without password)
-console.log('=== Email Configuration ===')
-console.log('Provider:', usesSendGrid ? 'SendGrid' : 'SMTP')
-if (usesSendGrid) {
-  console.log('SendGrid API Key configured:', config.email.sendGridApiKey ? 'YES (length: ' + config.email.sendGridApiKey.length + ')' : 'NO')
-  sgMail.setApiKey(config.email.sendGridApiKey)
+// Configure SendGrid
+if (!config.email.sendGridApiKey) {
+  console.error('❌ ERROR: SENDGRID_API_KEY is not configured!')
+  console.error('Please set SENDGRID_API_KEY in your environment variables')
 } else {
-  console.log('Host:', config.email.host)
-  console.log('Port:', config.email.port)
-  console.log('Secure:', config.email.secure)
-  console.log('User:', config.email.user)
-  console.log('Password configured:', config.email.password ? 'YES (length: ' + config.email.password.length + ')' : 'NO')
-}
-console.log('From:', config.email.from)
-console.log('App URL:', config.appUrl)
-console.log('==========================')
-
-// Create reusable transporter (only for SMTP)
-let transporter = null
-if (!usesSendGrid) {
-  transporter = nodemailer.createTransport({
-    host: config.email.host,
-    port: config.email.port,
-    secure: config.email.secure,
-    auth: {
-      user: config.email.user,
-      pass: config.email.password
-    }
-  })
+  sgMail.setApiKey(config.email.sendGridApiKey)
+  console.log('=== Email Configuration ===')
+  console.log('Provider: SendGrid')
+  console.log('SendGrid API Key: Configured ✓')
+  console.log('From:', config.email.from)
+  console.log('App URL:', config.appUrl)
+  console.log('==========================')
 }
 
 export async function sendVerificationEmail(email, verificationToken) {
   try {
-    console.log('\n📧 Attempting to send verification email...')
-    console.log('Provider: SendGrid')
+    console.log('\n📧 Sending verification email via SendGrid...')
     console.log('To:', email)
     console.log('Token:', verificationToken)
     
@@ -96,25 +74,20 @@ export async function sendVerificationEmail(email, verificationToken) {
       `
     }
 
-    console.log('Sending email with SendGrid:', {
-      from: msg.from,
-      to: msg.to,
-      subject: msg.subject
-    })
+    console.log('Sending to:', msg.to)
     
     const response = await sgMail.send(msg)
     console.log('✅ Email sent successfully via SendGrid!')
-    console.log('Status Code:', response[0].statusCode)
+    console.log('Status:', response[0].statusCode)
     
     return { success: true }
   } catch (error) {
     console.error('\n❌ ERROR sending verification email:')
-    console.error('Error name:', error.name)
-    console.error('Error message:', error.message)
-    console.error('Error code:', error.code)
-    console.error('SendGrid response:', error.response?.body)
+    console.error('Error:', error.message)
+    if (error.response) {
+      console.error('SendGrid response:', error.response.body)
+    }
     console.error('Full error:', error)
-    console.error('Stack trace:', error.stack)
     throw error
   }
 }
