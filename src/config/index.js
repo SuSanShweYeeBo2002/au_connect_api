@@ -37,12 +37,8 @@ export default {
     s3BucketName: process.env.AWS_S3_BUCKET_NAME || 'au-connect-uploads'
   },
   email: {
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT || 587,
-    secure: process.env.EMAIL_SECURE === 'true',
-    user: process.env.EMAIL_USER,
-    password: process.env.EMAIL_PASSWORD,
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER
+    sendGridApiKey: process.env.SENDGRID_API_KEY,
+    from: process.env.EMAIL_FROM || 'AU Connect <noreply@auconnect.app>'
   },
   allowedEmailDomains: process.env.ALLOWED_EMAIL_DOMAINS 
     ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim()) 

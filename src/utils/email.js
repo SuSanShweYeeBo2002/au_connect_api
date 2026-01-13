@@ -1,40 +1,54 @@
 import nodemailer from 'nodemailer'
+import sgMail from '@sendgrid/mail'
 import config from '../config/index.js'
+
+// Determine email provider
+const usesSendGrid = !!config.email.sendGridApiKey
 
 // Log email configuration (without password)
 console.log('=== Email Configuration ===')
-console.log('Host:', config.email.host)
-console.log('Port:', config.email.port)
-console.log('Secure:', config.email.secure)
-console.log('User:', config.email.user)
+console.log('Provider:', usesSendGrid ? 'SendGrid' : 'SMTP')
+if (usesSendGrid) {
+  console.log('SendGrid API Key configured:', config.email.sendGridApiKey ? 'YES (length: ' + config.email.sendGridApiKey.length + ')' : 'NO')
+  sgMail.setApiKey(config.email.sendGridApiKey)
+} else {
+  console.log('Host:', config.email.host)
+  console.log('Port:', config.email.port)
+  console.log('Secure:', config.email.secure)
+  console.log('User:', config.email.user)
+  console.log('Password configured:', config.email.password ? 'YES (length: ' + config.email.password.length + ')' : 'NO')
+}
 console.log('From:', config.email.from)
-console.log('Password configured:', config.email.password ? 'YES (length: ' + config.email.password.length + ')' : 'NO')
 console.log('App URL:', config.appUrl)
 console.log('==========================')
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  host: config.email.host,
-  port: config.email.port,
-  secure: config.email.secure,
-  auth: {
-    user: config.email.user,
-    pass: config.email.password
-  }
-})
+// Create reusable transporter (only for SMTP)
+let transporter = null
+if (!usesSendGrid) {
+  transporter = nodemailer.createTransport({
+    host: config.email.host,
+    port: config.email.port,
+    secure: config.email.secure,
+    auth: {
+      user: config.email.user,
+      pass: config.email.password
+    }
+  })
+}
 
 export async function sendVerificationEmail(email, verificationToken) {
   try {
     console.log('\n📧 Attempting to send verification email...')
+    console.log('Provider: SendGrid')
     console.log('To:', email)
     console.log('Token:', verificationToken)
     
     const verificationUrl = `${config.appUrl}/users/verify-email?token=${verificationToken}`
     console.log('Verification URL:', verificationUrl)
     
-    const mailOptions = {
-      from: config.email.from,
+    const msg = {
       to: email,
+      from: config.email.from,
       subject: 'Verify Your Email - AU Connect',
       html: `
         <!DOCTYPE html>
@@ -74,7 +88,7 @@ export async function sendVerificationEmail(email, verificationToken) {
             </div>
             <div class="footer">
               <p>If you didn't create an account, please ignore this email.</p>
-              <p>&copy; 2025 AU Connect. All rights reserved.</p>
+              <p>&copy; 2026 AU Connect. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -82,16 +96,15 @@ export async function sendVerificationEmail(email, verificationToken) {
       `
     }
 
-    console.log('Sending email with options:', {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject
+    console.log('Sending email with SendGrid:', {
+      from: msg.from,
+      to: msg.to,
+      subject: msg.subject
     })
     
-    const info = await transporter.sendMail(mailOptions)
-    console.log('✅ Email sent successfully!')
-    console.log('Message ID:', info.messageId)
-    console.log('Response:', info.response)
+    const response = await sgMail.send(msg)
+    console.log('✅ Email sent successfully via SendGrid!')
+    console.log('Status Code:', response[0].statusCode)
     
     return { success: true }
   } catch (error) {
@@ -99,7 +112,7 @@ export async function sendVerificationEmail(email, verificationToken) {
     console.error('Error name:', error.name)
     console.error('Error message:', error.message)
     console.error('Error code:', error.code)
-    console.error('Error command:', error.command)
+    console.error('SendGrid response:', error.response?.body)
     console.error('Full error:', error)
     console.error('Stack trace:', error.stack)
     throw error
