@@ -146,17 +146,17 @@ async function verifyEmail(req, res, next) {
     
     if (!token) {
       // Redirect to frontend with error
-      return res.redirect('https://bespoke-semolina-51bad9.netlify.app/?verification=error&message=Invalid verification link')
+      return res.redirect('https://velvety-gnome-b3b6b3.netlify.app/?verification=error&message=Invalid verification link')
     }
 
     const result = await verifyEmailService(token)
     
     // Redirect to frontend signin page with success message
-    res.redirect('https://bespoke-semolina-51bad9.netlify.app/?verification=success')
+    res.redirect('https://velvety-gnome-b3b6b3.netlify.app/?verification=success')
   } catch (error) {
     // Redirect to frontend with error
     const errorMessage = encodeURIComponent(error.message || 'Verification failed')
-    res.redirect(`https://bespoke-semolina-51bad9.netlify.app/?verification=error&message=${errorMessage}`)
+    res.redirect(`https://velvety-gnome-b3b6b3.netlify.app/?verification=error&message=${errorMessage}`)
   }
 }
 
