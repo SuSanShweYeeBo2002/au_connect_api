@@ -48,6 +48,34 @@ export const updateUserValidation = (req, res, next) => {
   next()
 }
 
+export const forgotPasswordValidation = (req, res, next) => {
+  const { email } = req.body
+
+  const schema = Joi.object({
+    email: Joi.string().email().required()
+  })
+  const data = {
+    email
+  }
+  checkValidation(schema, data)
+  next()
+}
+
+export const resetPasswordValidation = (req, res, next) => {
+  const { token, newPassword } = req.body
+
+  const schema = Joi.object({
+    token: Joi.string().required(),
+    newPassword: Joi.string().min(6).required()
+  })
+  const data = {
+    token,
+    newPassword
+  }
+  checkValidation(schema, data)
+  next()
+}
+
 export const userIdValidation = (req, res, next) => {
   const schema = Joi.object({
     userId: Joi.string().hex().length(24).required()

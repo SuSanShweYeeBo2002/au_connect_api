@@ -4,7 +4,9 @@ import {
   signupValidation,
   signinValidation,
   updateUserValidation,
-  userIdValidation
+  userIdValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation
 } from '../validations/user.validation.js'
 
 import {
@@ -17,7 +19,9 @@ import {
   uploadProfileImage,
   deleteProfileImage,
   verifyEmail,
-  resendVerificationEmail
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword
 } from '../controllers/user.controller.js'
 
 import { checkAuth } from '../middlewares/auth.middleware.js'
@@ -29,6 +33,8 @@ router.post('/signup', signupValidation, signup)
 router.post('/signin', signinValidation, signin)
 router.get('/verify-email', verifyEmail)
 router.post('/resend-verification', resendVerificationEmail)
+router.post('/forgot-password', forgotPasswordValidation, forgotPassword)
+router.post('/reset-password', resetPasswordValidation, resetPassword)
 router.get('/list', checkAuth, getUserList)
 router.get('/me', checkAuth, getCurrentUser)
 router.put('/me', checkAuth, updateUserValidation, updateUser)

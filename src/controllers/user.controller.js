@@ -8,7 +8,9 @@ import {
   uploadProfileImageService,
   deleteProfileImageService,
   verifyEmailService,
-  resendVerificationEmailService
+  resendVerificationEmailService,
+  forgotPasswordService,
+  resetPasswordService
 } from '../services/user.service.js'
 
 async function signup (req, res, next) {
@@ -182,6 +184,28 @@ async function resendVerificationEmail(req, res, next) {
   }
 }
 
+async function forgotPassword(req, res, next) {
+  try {
+    const { email } = req.body
+
+    const result = await forgotPasswordService({ email })
+    res.status(200).send(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+async function resetPassword(req, res, next) {
+  try {
+    const { token, newPassword } = req.body
+
+    const result = await resetPasswordService({ token, newPassword })
+    res.status(200).send(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export { 
   signup, 
   signin, 
@@ -192,5 +216,7 @@ export {
   uploadProfileImage,
   deleteProfileImage,
   verifyEmail,
-  resendVerificationEmail
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword
 }

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 
 import User from '../models/user.js'
 import { deleteFromS3 } from '../utils/s3.js'
-import { sendVerificationEmail, validateEmailDomain, generateVerificationToken } from '../utils/email.js'
+import { sendVerificationEmail, validateEmailDomain, generateVerificationToken, sendPasswordResetEmail } from '../utils/email.js'
 
 async function signupService ({ email, password }) {
   try {
@@ -341,6 +341,93 @@ async function resendVerificationEmailService(email) {
   }
 }
 
+async function forgotPasswordService({ email }) {
+  try {
+    // Find user by email
+    const user = await User.findOne({ email })
+    
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return {
+        status: 'success',
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      }
+    }
+
+    // Generate reset token
+    const resetToken = generateVerificationToken()
+    const resetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+    // Update user with reset token
+    user.passwordResetToken = resetToken
+    user.passwordResetExpires = resetExpires
+    await user.save()
+
+    // Send password reset email
+    try {
+      console.log('\n🔄 Forgot Password: Sending reset email to:', email)
+      await sendPasswordResetEmail(email, resetToken)
+      console.log('✅ Password reset email sent successfully')
+    } catch (emailError) {
+      console.error('\n⚠️ Failed to send password reset email:')
+      console.error('Email:', email)
+      console.error('Error:', emailError.message)
+      
+      // Clear the reset token if email fails
+      user.passwordResetToken = null
+      user.passwordResetExpires = null
+      await user.save()
+      
+      const err = new Error()
+      err.message = 'Failed to send password reset email. Please try again.'
+      err.status = 500
+      throw err
+    }
+
+    return {
+      status: 'success',
+      message: 'If an account with that email exists, a password reset link has been sent.'
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+async function resetPasswordService({ token, newPassword }) {
+  try {
+    // Find user with valid reset token
+    const user = await User.findOne({
+      passwordResetToken: token,
+      passwordResetExpires: { $gt: Date.now() }
+    })
+
+    if (!user) {
+      const err = new Error()
+      err.message = 'Password reset token is invalid or has expired.'
+      err.status = 400
+      throw err
+    }
+
+    // Hash new password
+    const hash = await bcrypt.hash(newPassword, 10)
+
+    // Update password and clear reset token
+    user.password = hash
+    user.passwordResetToken = null
+    user.passwordResetExpires = null
+    await user.save()
+
+    console.log('✅ Password reset successful for user:', user.email)
+
+    return {
+      status: 'success',
+      message: 'Password has been reset successfully. You can now login with your new password.'
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   signupService,
   signinService,
@@ -351,5 +438,7 @@ export {
   uploadProfileImageService,
   deleteProfileImageService,
   verifyEmailService,
-  resendVerificationEmailService
+  resendVerificationEmailService,
+  forgotPasswordService,
+  resetPasswordService
 }

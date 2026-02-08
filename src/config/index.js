@@ -43,5 +43,6 @@ export default {
   allowedEmailDomains: process.env.ALLOWED_EMAIL_DOMAINS 
     ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim()) 
     : ['student.university.edu', 'university.edu'], // Default domains - change this!
-  appUrl: process.env.APP_URL || 'http://localhost:8383'
+  appUrl: process.env.APP_URL || 'http://localhost:8383',
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
 }
