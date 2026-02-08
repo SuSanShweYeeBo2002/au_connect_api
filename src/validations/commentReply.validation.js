@@ -6,8 +6,7 @@ const addReply = {
     commentId: Joi.string().custom(objectId).required()
   }),
   body: Joi.object({
-    content: Joi.string().max(500).required(),
-    image: Joi.string().uri().allow(null, '')
+    content: Joi.string().max(500).required()
   })
 }
 
@@ -26,8 +25,7 @@ const updateReply = {
     replyId: Joi.string().custom(objectId).required()
   }),
   body: Joi.object({
-    content: Joi.string().max(500).required(),
-    image: Joi.string().uri().allow(null, '')
+    content: Joi.string().max(500).required()
   })
 }
 

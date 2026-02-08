@@ -1,5 +1,6 @@
 import Comment from '../models/comment.js'
 import Post from '../models/post.js'
+import { deleteFromS3 } from '../utils/s3.js'
 
 async function addComment(postId, authorId, content, image = null) {
   try {
@@ -81,9 +82,17 @@ async function updateComment(commentId, authorId, content, image = null) {
     }
 
     comment.content = content
-    if (image !== null) {
+    
+    // If new image is uploaded and old image exists, delete old image from S3
+    if (image !== undefined && image !== null && comment.image) {
+      await deleteFromS3(comment.image)
+    }
+    
+    // Update image if provided
+    if (image !== undefined) {
       comment.image = image
     }
+    
     await comment.save()
 
     return comment.populate('author', 'email displayName profileImage')
@@ -113,6 +122,11 @@ async function deleteComment(commentId, userId) {
       err.message = 'Unauthorized to delete this comment'
       err.status = 403
       throw err
+    }
+
+    // Delete image from S3 if exists
+    if (comment.image) {
+      await deleteFromS3(comment.image)
     }
 
     const postId = comment.postId._id

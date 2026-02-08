@@ -6,17 +6,18 @@ import {
   updateReply,
   deleteReply
 } from '../controllers/commentReply.controller.js'
+import { uploadCommentReplyImage } from '../utils/s3.js'
 
 const router = express.Router()
 
 // Add a reply to a comment
-router.post('/:commentId/replies', checkAuth, addReply)
+router.post('/:commentId/replies', checkAuth, uploadCommentReplyImage.single('image'), addReply)
 
 // Get all replies for a comment
 router.get('/:commentId/replies', getRepliesByComment)
 
 // Update a reply
-router.put('/replies/:replyId', checkAuth, updateReply)
+router.put('/replies/:replyId', checkAuth, uploadCommentReplyImage.single('image'), updateReply)
 
 // Delete a reply
 router.delete('/replies/:replyId', checkAuth, deleteReply)

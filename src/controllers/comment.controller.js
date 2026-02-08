@@ -8,8 +8,9 @@ import {
 async function addComment(req, res, next) {
   try {
     const { postId } = req.params
-    const { content, image } = req.body
+    const { content } = req.body
     const authorId = req.userData.id
+    const image = req.file ? req.file.location : null
 
     const comment = await addCommentService(postId, authorId, content, image)
     res.status(201).send({
@@ -43,8 +44,9 @@ async function getCommentsByPost(req, res, next) {
 async function updateComment(req, res, next) {
   try {
     const { commentId } = req.params
-    const { content, image } = req.body
+    const { content } = req.body
     const authorId = req.userData.id
+    const image = req.file ? req.file.location : undefined
 
     const comment = await updateCommentService(commentId, authorId, content, image)
     res.status(200).send({

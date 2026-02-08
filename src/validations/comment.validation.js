@@ -2,8 +2,7 @@ import Joi from '@hapi/joi'
 
 const addCommentValidation = (req, res, next) => {
   const schema = Joi.object({
-    content: Joi.string().required().min(1).max(500).trim(),
-    image: Joi.string().uri().optional().allow('').allow(null)
+    content: Joi.string().required().min(1).max(500).trim()
   })
 
   const { error } = schema.validate(req.body)
@@ -18,8 +17,7 @@ const addCommentValidation = (req, res, next) => {
 
 const updateCommentValidation = (req, res, next) => {
   const schema = Joi.object({
-    content: Joi.string().required().min(1).max(500).trim(),
-    image: Joi.string().uri().optional().allow('').allow(null)
+    content: Joi.string().required().min(1).max(500).trim()
   })
 
   const { error } = schema.validate(req.body)

@@ -8,8 +8,9 @@ import {
 async function addReply(req, res, next) {
   try {
     const { commentId } = req.params
-    const { content, image } = req.body
+    const { content } = req.body
     const authorId = req.userData.id
+    const image = req.file ? req.file.location : null
 
     const reply = await addReplyService(commentId, authorId, content, image)
     res.status(201).send({
@@ -43,8 +44,9 @@ async function getRepliesByComment(req, res, next) {
 async function updateReply(req, res, next) {
   try {
     const { replyId } = req.params
-    const { content, image } = req.body
+    const { content } = req.body
     const authorId = req.userData.id
+    const image = req.file ? req.file.location : undefined
 
     const reply = await updateReplyService(replyId, authorId, content, image)
     res.status(200).send({
