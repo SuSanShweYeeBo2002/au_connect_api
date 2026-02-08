@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
 const { Schema } = mongoose
 
-const commentSchema = new Schema(
+const commentReplySchema = new Schema(
   {
-    postId: {
+    commentId: {
       type: Schema.Types.ObjectId,
-      ref: 'Post',
+      ref: 'Comment',
       required: true
     },
     author: {
@@ -20,14 +20,6 @@ const commentSchema = new Schema(
     },
     image: {
       type: String // URL to uploaded image
-    },
-    replyCount: {
-      type: Number,
-      default: 0
-    },
-    reactionCount: {
-      type: Number,
-      default: 0
     }
   },
   {
@@ -36,6 +28,6 @@ const commentSchema = new Schema(
 )
 
 // Index for better query performance
-commentSchema.index({ postId: 1, createdAt: -1 })
+commentReplySchema.index({ commentId: 1, createdAt: -1 })
 
-export default mongoose.model('Comment', commentSchema)
+export default mongoose.model('CommentReply', commentReplySchema)
