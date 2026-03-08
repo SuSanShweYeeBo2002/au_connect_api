@@ -152,6 +152,27 @@ export const uploadCommentReplyImage = multer({
   }
 })
 
+// Multer upload configuration for sponsor ad images
+export const uploadSponsorAdImage = multer({
+  storage: multerS3({
+    s3: s3Client,
+    bucket: config.aws.s3BucketName,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname })
+    },
+    key: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      const ext = path.extname(file.originalname)
+      cb(null, `sponsor-ad-images/${uniqueSuffix}${ext}`)
+    }
+  }),
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+})
+
 // Function to delete file from S3
 export const deleteFromS3 = async (fileUrl) => {
   try {
@@ -172,4 +193,4 @@ export const deleteFromS3 = async (fileUrl) => {
   }
 }
 
-export default { uploadToS3, uploadPostImage, uploadLostItemImage, uploadSellItemImage, uploadCommentImage, uploadCommentReplyImage, deleteFromS3, s3Client }
+export default { uploadToS3, uploadPostImage, uploadLostItemImage, uploadSellItemImage, uploadCommentImage, uploadCommentReplyImage, uploadSponsorAdImage, deleteFromS3, s3Client }

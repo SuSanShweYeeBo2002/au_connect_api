@@ -40,6 +40,10 @@ const UserSchema = new Schema(
     passwordResetExpires: {
       type: Date,
       default: null
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false
     }
   },
   {
