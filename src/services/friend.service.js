@@ -80,7 +80,7 @@ async function getPendingRequestsService(userId) {
       recipientId: userId,
       status: 'pending'
     })
-      .populate('requesterId', 'email')
+      .populate('requesterId', 'email displayName profileImage')
       .sort({ createdAt: -1 })
 
     return {
@@ -103,7 +103,7 @@ async function getSentRequestsService(userId) {
       requesterId: userId,
       status: 'pending'
     })
-      .populate('recipientId', 'email')
+      .populate('recipientId', 'email displayName profileImage')
       .sort({ createdAt: -1 })
 
     return {
@@ -171,8 +171,8 @@ async function getFriendsListService(userId) {
       $or: [{ requesterId: userId }, { recipientId: userId }],
       status: 'accepted'
     })
-      .populate('requesterId', 'email')
-      .populate('recipientId', 'email')
+      .populate('requesterId', 'email displayName profileImage')
+      .populate('recipientId', 'email displayName profileImage')
       .sort({ updatedAt: -1 })
 
     // Format the response to show the friend (not the current user)
