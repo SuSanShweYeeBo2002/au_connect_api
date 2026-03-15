@@ -295,7 +295,7 @@ async function verifyEmailService(token) {
     user.emailVerificationExpires = null
     await user.save()
 
-    return { message: 'Email verified successfully. You can now sign in.' }
+    return { message: 'Email verified successfully. You can now sign in.', email: user.email }
   } catch (error) {
     const err = new Error()
     err.message = error.message

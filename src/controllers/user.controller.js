@@ -154,10 +154,12 @@ async function verifyEmail(req, res, next) {
       return res.redirect(`${signinUrl}?verification=error&message=Invalid verification link`)
     }
 
-    await verifyEmailService(token)
-    
+    const { email } = await verifyEmailService(token)
+
     // Redirect to sign-in page so user manually logs in after verification
-    res.redirect(`${signinUrl}?verification=success`)
+    // email param lets the frontend pre-fill the email field and clear any existing session
+    const params = `verification=success${email ? `&email=${encodeURIComponent(email)}` : ''}`
+    res.redirect(`${signinUrl}?${params}`)
   } catch (error) {
     const errorMessage = encodeURIComponent(error.message || 'Verification failed')
     res.redirect(`${signinUrl}?verification=error&message=${errorMessage}`)
