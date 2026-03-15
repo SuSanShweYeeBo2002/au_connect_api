@@ -12,6 +12,7 @@ import {
   forgotPasswordService,
   resetPasswordService
 } from '../services/user.service.js'
+import config from '../config/index.js'
 
 async function signup (req, res, next) {
   try {
@@ -143,22 +144,25 @@ async function deleteProfileImage(req, res, next) {
 }
 
 async function verifyEmail(req, res, next) {
+  const frontendBaseUrl = (config.frontendUrl || '').replace(/\/$/, '')
+  const verificationRedirectUrl = `${frontendBaseUrl}/#/main`
+
   try {
     const { token } = req.query
     
     if (!token) {
       // Redirect to frontend with error
-      return res.redirect('https://beautiful-croquembouche-cb5c68.netlify.app/#/main?verification=error&message=Invalid verification link')
+      return res.redirect(`${verificationRedirectUrl}?verification=error&message=Invalid verification link`)
     }
 
     const result = await verifyEmailService(token)
     
     // Redirect to frontend signin page with success message
-    res.redirect('https://beautiful-croquembouche-cb5c68.netlify.app/#/main?verification=success')
+    res.redirect(`${verificationRedirectUrl}?verification=success`)
   } catch (error) {
     // Redirect to frontend with error
     const errorMessage = encodeURIComponent(error.message || 'Verification failed')
-    res.redirect(`https://beautiful-croquembouche-cb5c68.netlify.app/#/main?verification=error&message=${errorMessage}`)
+    res.redirect(`${verificationRedirectUrl}?verification=error&message=${errorMessage}`)
   }
 }
 
