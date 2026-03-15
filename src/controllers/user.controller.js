@@ -145,24 +145,22 @@ async function deleteProfileImage(req, res, next) {
 
 async function verifyEmail(req, res, next) {
   const frontendBaseUrl = (config.frontendUrl || '').replace(/\/$/, '')
-  const verificationRedirectUrl = `${frontendBaseUrl}/#/main`
+  const signinUrl = `${frontendBaseUrl}/#/signin`
 
   try {
     const { token } = req.query
     
     if (!token) {
-      // Redirect to frontend with error
-      return res.redirect(`${verificationRedirectUrl}?verification=error&message=Invalid verification link`)
+      return res.redirect(`${signinUrl}?verification=error&message=Invalid verification link`)
     }
 
-    const result = await verifyEmailService(token)
+    await verifyEmailService(token)
     
-    // Redirect to frontend signin page with success message
-    res.redirect(`${verificationRedirectUrl}?verification=success`)
+    // Redirect to sign-in page so user manually logs in after verification
+    res.redirect(`${signinUrl}?verification=success`)
   } catch (error) {
-    // Redirect to frontend with error
     const errorMessage = encodeURIComponent(error.message || 'Verification failed')
-    res.redirect(`${verificationRedirectUrl}?verification=error&message=${errorMessage}`)
+    res.redirect(`${signinUrl}?verification=error&message=${errorMessage}`)
   }
 }
 
